@@ -23,4 +23,3 @@ jobs:
         run: |
           docker build -t bulakh/lab1bulakh:latest .
           docker push bulakh/lab1bulakh:latest
-          "
