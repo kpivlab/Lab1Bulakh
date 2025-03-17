@@ -23,3 +23,11 @@ jobs:
         run: |
           docker build -t bulakh/lab1bulakh:latest .
           docker push bulakh/lab1bulakh:latest
+      - name: Deploy to AWS EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@13.60.253.62"
+            docker stop lab1bulakh || true &&
+            docker rm lab1bulakh || true &&
+            docker pull bulakh/lab1bulakh:latest &&
+            docker run -d -p 80:80 --name lab1bulakh bulakh/lab1bulakh:latest
+          "
