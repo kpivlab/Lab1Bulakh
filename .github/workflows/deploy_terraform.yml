@@ -57,15 +57,13 @@ jobs:
             --query 'SecurityGroups[0].GroupId' --output text)
           terraform import aws_security_group.web_sg $SG_ID || true
 
-      - name: Import EC2 Instance
-        run: |
-            INSTANCE_ID=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=terraform-demo-instance" \
-              --query 'Reservations[0].Instances[0].InstanceId' --output text)
-            terraform import aws_instance.app $INSTANCE_ID || true
-        
       - name: Mark instance for recreation
-        run: terraform taint aws_instance.app || true
+        run: |
+          if terraform state list | grep -q aws_instance.app; then
+             terraform taint aws_instance.app
+          else
+             echo "No aws_instance.app in state; skip taint"
+           fi
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
