@@ -1,0 +1,17 @@
+*.pem
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+# Локальні override-и
+override.tf
+override.tf.json
+*_override.tf
+# Файли, створені Terraform
+.terraform/
+crash.log
+# Lock-файл провайдера в комітити можна
+# .terraform.lock.hcl
+
+# Якщо у вас є файл terraform.tfvars з ключами, його теж ігноруємо
+terraform.tfvars

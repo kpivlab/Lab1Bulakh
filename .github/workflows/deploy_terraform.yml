@@ -1,0 +1,64 @@
+name: CI/CD to AWS EC2
+
+on:
+  push:
+    branches:
+      - terraform
+
+jobs:
+  docker:
+    name: Build & Push Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          docker build -t bulakh/lab1bulakh:latest .
+          docker push bulakh/lab1bulakh:latest
+
+  terraform:
+    name: Terraform Provision
+    needs: docker
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION:            eu-north-1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Import Security Group
+        run: |
+          SG_ID=$(aws ec2 describe-security-groups \
+            --filters Name=group-name,Values=web-sg \
+            --query 'SecurityGroups[0].GroupId' --output text)
+          terraform import aws_security_group.web_sg $SG_ID || true
+      
+      - name: Mark instance for recreation
+        run: terraform taint aws_instance.app || true
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Output Instance IP
+        run: echo "App URL: http://$(terraform output -raw instance_ip)"
