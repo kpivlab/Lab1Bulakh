@@ -66,8 +66,8 @@ jobs:
            fi
 
       - name: Import SSH Key Pair
-        run: |
-          terraform -chdir=terraform import aws_key_pair.terraform_key terraform-demo || true
+        run: terraform import aws_key_pair.terraform_key terraform-demo || true
+        working-directory: terraform
          
       - name: Terraform Plan
         run: terraform plan -out=tfplan
