@@ -47,6 +47,19 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Terminate existing instances
+        run: |
+          INSTANCES=$(aws ec2 describe-instances \
+            --filters Name=tag:Name,Values=terraform-demo-instance \
+            --query 'Reservations[].Instances[].InstanceId' --output text)
+          if [ -n "$INSTANCES" ]; then
+            echo "Terminating existing instances: $INSTANCES"
+            aws ec2 terminate-instances --instance-ids $INSTANCES
+            aws ec2 wait instance-terminated --instance-ids $INSTANCES
+          else
+            echo "No instances to terminate."
+          fi
+
       - name: Terraform Init
         run: terraform init
 
