@@ -65,6 +65,10 @@ jobs:
              echo "No aws_instance.app in state; skip taint"
            fi
 
+      - name: Import SSH Key Pair
+        run: |
+          terraform -chdir=terraform import aws_key_pair.terraform_key terraform-demo || true
+         
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
