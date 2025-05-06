@@ -20,7 +20,6 @@ jobs:
 
       - name: Install linters
         run: |
-          npm ci
           npm install --save-dev stylelint stylelint-config-standard htmlhint
 
       - name: Create Stylelint config
