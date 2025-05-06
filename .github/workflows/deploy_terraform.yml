@@ -59,6 +59,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push Docker image
+        working-directory: ./web
         run: |
           docker build -t bulakh/lab1bulakh:latest .
           docker push bulakh/lab1bulakh:latest
